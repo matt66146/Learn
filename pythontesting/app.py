@@ -81,15 +81,20 @@ def index():
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
-        username = form.username.data.strip()
+        username = form.username.data.strip() if form.username.data else ''
         password = form.password.data
+
+        if not password:
+            flash('Password is required.', 'danger')
+            return redirect(url_for('register'))
 
         existing = User.query.filter_by(username=username).first()
         if existing:
             flash('Username already taken.', 'danger')
             return redirect(url_for('register'))
 
-        user = User(username=username)
+        user = User()
+        user.username = username
         user.set_password(password)
         db.session.add(user)
         db.session.commit()
@@ -106,7 +111,7 @@ def login():
         flash('Invalid input.', 'danger')
         return redirect(url_for('index'))
 
-    username = form.username.data.strip()
+    username = form.username.data.strip() if form.username.data else ''
     password = form.password.data
     user = User.query.filter_by(username=username).first()
     now = datetime.utcnow()
