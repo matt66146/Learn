@@ -9,8 +9,15 @@ from wtforms.validators import DataRequired, Length
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
+
 app = Flask(__name__)
+
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET', 'dev-secret')
+print(f"Using secret key: {app.config['SECRET_KEY']} (debug={app.debug})")
+if not app.debug and app.config['SECRET_KEY'] == 'dev-secret':
+    raise Exception(
+        'In production, set a strong FLASK_SECRET environment variable!')
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + \
     os.path.join(BASE_DIR, 'app.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -158,6 +165,4 @@ def logout():
 
 
 if __name__ == '__main__':
-    debug_mode = os.environ.get('FLASK_DEBUG', '0') == '1'
-
-    app.run(host='0.0.0.0', port=5000, debug=debug_mode)
+    app.run(host='0.0.0.0', port=5000, debug=False)
